@@ -1,0 +1,84 @@
+---
+title: "Dashboard sobre a Lei Seca - Salvador/BA"
+author: "William Sacramento"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    theme: cerulean
+    logo: logo4.png
+    social: menu
+    source_code: embed
+    navbar: 
+      - { title: "Sobre mim", href: "https://linkedin.com/in/william-sacramento-a9605a219" }
+---
+
+```{r setup, include=FALSE}
+library(rbokeh)
+library(flexdashboard)
+library(readxl)
+
+dados <- read_excel("C:/UFBa/Projeto/dbleiseca/lei_seca.xlsx")
+```
+
+# Visualização {data-icon="fa-signal"}
+
+## Column {.sidebar}
+
+Dashboard inicial para apresentar os dados referentes a Lei Seca na cidade de Salvador-Bahia. <p>
+Fonte dos dados: Transalvador
+
+## Column {data-width=600}
+
+### Abordagem
+
+```{r}
+library(ggplot2)
+library(babynames)
+library(dplyr)
+
+
+# Plot
+g <- ggplot(dados, aes(Mês, Abordagem))+
+  geom_line(colour = 'green')
+g
+```
+
+## Column {data-width=400}
+
+### Infrações
+
+```{r}
+library(ggplot2)
+library(babynames)
+library(dplyr)
+
+
+# Plot
+g <- ggplot(dados, aes(Mês, infrações))+
+  geom_line(colour = 'red')
+g
+```
+
+### CNH Apreendida
+
+```{r}
+library(ggplot2)
+library(babynames)
+library(dplyr)
+
+
+# Plot
+g <- ggplot(dados, aes(Mês, `CNH apreendida`))+
+  geom_line(colour = 'blue')
+g
+```
+
+# Tabela {data-icon="fa-table"}
+
+### Tabela
+```{r}
+
+dados1 <- as.data.frame(dados)
+dados1
+
+```
