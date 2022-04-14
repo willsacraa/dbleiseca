@@ -1,0 +1,130 @@
+---
+title: "Dashboard - Audiência de Custódia - Salvador/BA"
+author: "William Sacramento"
+runtime: shiny
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    theme: cerulean
+    logo: logo4.png
+    social: menu
+    source_code: embed
+    navbar: 
+      - { title: "Meu Linkedin", href: "https://linkedin.com/in/william-sacramento-a9605a219" }
+---
+
+```{r setup, include=FALSE}
+library(rbokeh)
+library(flexdashboard)
+library(readxl)
+library(readr)
+
+dados <- read.csv("C:/UFBa/Projeto/dbleiseca/aud_sexo_bio - sexo_bio.csv")
+dados1 <- read_xlsx("C:/UFBa/Projeto/dbleiseca/raca.xlsx")
+dados2 <- read_delim("audiencia_idade.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+```
+
+# Visualização 1 {data-icon="fa-signal" data-navmenu="Análises"}
+
+## Column {.sidebar}
+
+Dashboard inicial para apresentar os dados referentes à Audiência de Custódia na cidade de Salvador-Bahia. <p>
+Fonte dos dados: Defensoria Pública
+
+## Column {data-width=500}
+
+### Gráfico de Autuados por Sexo Biológico
+
+```{r}
+library(ggplot2)
+library(babynames)
+library(dplyr)
+
+# Plot
+g <- ggplot(dados, aes(x = ano))+
+  geom_col(aes(y=Homens), fill = 'cyan')+
+  geom_col(aes(y=Mulheres), fill = 'pink')+
+  ylab('Número de autuados')
+  
+g
+```
+
+## Column {data-width=500}
+
+### Gráfico de Autuados por Idade
+
+```{r}
+library(ggplot2)
+library(babynames)
+library(dplyr)
+
+# Plot
+g1 <- ggplot(dados2, aes(x = ano))+
+  geom_col(aes(y=`18-29`), fill = 'blue')+
+  geom_col(aes(y=`30-41`), fill = 'cyan')+
+  geom_col(aes(y=`42-53`), fill = 'green')+
+  geom_col(aes(y=maiores_60), fill = 'yellow')+
+  ylab('Número de autuados')
+g1
+```
+
+# Visualização 2 {data-icon="fa-signal" data-navmenu="Análises"}
+
+## Column {.sidebar}
+
+```{r}
+
+inputPanel(
+  selectInput("ano", label = h3("Selecione o ano:"),
+              choices = list('2017','2018','2019'), selected = '2019'))
+
+```
+
+
+## Column {data-width=600}
+
+### Gráfico de Autuados por Perfil Racial
+
+```{r}
+
+library(ggplot2)
+library(babynames)
+library(dplyr)
+
+# Plot
+renderPlot(
+  ggplot(
+    dados11 <- dados1 %>% 
+      filter(dados1$ano == input$ano),
+    
+    aes(x=raca,y=quantidade))+
+    
+  geom_col(aes(fill = raca))
+)
+
+
+```
+
+# Tabela {data-icon="fa-table" data-navmenu="Análises"}
+
+## Column {.sidebar}
+
+Tabela de Dados
+
+## Column {data-width=500}
+
+```{r}
+
+dados
+dados2
+
+```
+
+## Column {data-width=500}
+
+```{r}
+dados1
+```
+
