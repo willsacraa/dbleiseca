@@ -19,9 +19,9 @@ library(flexdashboard)
 library(readxl)
 library(readr)
 
-dados <- read.csv("C:/UFBa/Projeto/dbleiseca/aud_sexo_bio - sexo_bio.csv")
-dados1 <- read_xlsx("C:/UFBa/Projeto/dbleiseca/raca.xlsx")
-dados2 <- read_delim("audiencia_idade.csv", 
+dados <- read.csv("C:/UFBa/Projeto/dbleiseca/data/aud_sexo_bio - sexo_bio.csv")
+dados1 <- read_xlsx("C:/UFBa/Projeto/dbleiseca/data/raca.xlsx")
+dados2 <- read_delim("data/audiencia_idade.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE)
 
 ```

@@ -17,7 +17,7 @@ library(rbokeh)
 library(flexdashboard)
 library(readxl)
 
-dados <- read_excel("C:/UFBa/Projeto/dbleiseca/lei_seca.xlsx")
+dados <- read_excel("C:/UFBa/Projeto/dbleiseca/data/lei_seca.xlsx")
 ```
 
 # Visualização {data-icon="fa-signal"}
