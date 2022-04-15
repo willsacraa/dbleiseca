@@ -1,7 +1,6 @@
 ---
 title: "Dashboard - Audiência de Custódia - Salvador/BA"
 author: "William Sacramento"
-runtime: shiny
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -107,7 +106,7 @@ renderPlot(
 
 ```
 
-# Tabela {data-icon="fa-table" data-navmenu="Análises"}
+# Tabelas {data-icon="fa-table" data-navmenu="Análises"}
 
 ## Column {.sidebar}
 
