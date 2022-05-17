@@ -1,0 +1,32 @@
+---
+title: "Dashboard - Audiência de Custódia - Salvador/BA"
+author: "William Sacramento"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    theme: cerulean
+    logo: logo4.png
+    social: menu
+    source_code: embed
+    navbar: 
+      - { title: "Meu Linkedin", href: "https://linkedin.com/in/william-sacramento-a9605a219" }
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(readxl)
+library(readr)
+```
+
+# Visualização 1 {data-icon="fa-signal" data-navmenu="Análises"}
+
+## Column {.sidebar}
+
+Dashboard inicial para apresentar os dados referentes à . <p>
+Fonte dos dados: 
+
+## Column {data-width=500}
+
+### Gráfico de Autuados por Sexo Biológico
+
+

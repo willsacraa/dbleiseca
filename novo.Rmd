@@ -2,19 +2,15 @@
 title: "Dashboard - Audiência de Custódia - Salvador/BA"
 author: "William Sacramento"
 runtime: shiny
-output:
+output: 
   flexdashboard::flex_dashboard:
     orientation: columns
-    theme: yeti
-    logo: logo.png
+    theme: cerulean
+    logo: logo4.png
     social: menu
     source_code: embed
-    navbar:
-    - title: Meu Linkedin
-      href: https://linkedin.com/in/william-sacramento-a9605a219
-resource_files:
-- data/aud_sexo_bio - sexo_bio.csv
-- data/raca.xlsx
+    navbar: 
+      - { title: "Meu Linkedin", href: "https://linkedin.com/in/william-sacramento-a9605a219" }
 ---
 
 ```{r setup, include=FALSE}
@@ -23,8 +19,8 @@ library(flexdashboard)
 library(readxl)
 library(readr)
 
-dados <- read.csv("data/aud_sexo_bio - sexo_bio.csv")
-dados1 <- read_xlsx("data/raca.xlsx")
+dados <- read.csv("C:/UFBa/Projeto/dbleiseca/data/aud_sexo_bio - sexo_bio.csv")
+dados1 <- read_xlsx("C:/UFBa/Projeto/dbleiseca/data/raca.xlsx")
 dados2 <- read_delim("data/audiencia_idade.csv", 
     delim = ";", escape_double = FALSE, trim_ws = TRUE)
 
@@ -45,15 +41,14 @@ Fonte dos dados: Defensoria Pública
 library(ggplot2)
 library(babynames)
 library(dplyr)
-library(plotly)
 
 # Plot
-renderPlotly(
-  ggplot(dados, aes(x = ano))+
-    geom_col(aes(y=Homens), fill = 'cyan')+
-    geom_col(aes(y=Mulheres), fill = 'pink')+
-    ylab('Número de autuados')
-)
+g <- ggplot(dados, aes(x = ano))+
+  geom_col(aes(y=Homens), fill = 'cyan')+
+  geom_col(aes(y=Mulheres), fill = 'pink')+
+  ylab('Número de autuados')
+  
+g
 ```
 
 ## Column {data-width=500}
@@ -64,17 +59,15 @@ renderPlotly(
 library(ggplot2)
 library(babynames)
 library(dplyr)
-library(plotly)
 
 # Plot
-renderPlotly(
-  ggplot(dados2, aes(x = ano))+
-    geom_col(aes(y=`18-29`), fill = 'blue')+
-    geom_col(aes(y=`30-41`), fill = 'cyan')+
-    geom_col(aes(y=`42-53`), fill = 'green')+
-    geom_col(aes(y=maiores_60), fill = 'yellow')+
-    ylab('Número de autuados')
-)
+g1 <- ggplot(dados2, aes(x = ano))+
+  geom_col(aes(y=`18-29`), fill = 'blue')+
+  geom_col(aes(y=`30-41`), fill = 'cyan')+
+  geom_col(aes(y=`42-53`), fill = 'green')+
+  geom_col(aes(y=maiores_60), fill = 'yellow')+
+  ylab('Número de autuados')
+g1
 ```
 
 # Visualização 2 {data-icon="fa-signal" data-navmenu="Análises"}
@@ -99,10 +92,9 @@ inputPanel(
 library(ggplot2)
 library(babynames)
 library(dplyr)
-library(plotly)
 
 # Plot
-renderPlotly(
+renderPlot(
   ggplot(
     dados11 <- dados1 %>% 
       filter(dados1$ano == input$ano),

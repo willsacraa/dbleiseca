@@ -1,0 +1,292 @@
+---
+title: "Water and school"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+# Leitura do banco de dados 
+library(readxl)
+library(dplyr) 
+library(lubridate)
+library(sf)
+library(ggplot2)
+library(readr)
+library(leaflet)
+library(leaflet.extras)
+library(leaflet.providers)
+#library(dplyr)
+library(measurements)
+library(magrittr)
+#library(plotly)
+#library(ggplot2)
+#library(lubridate)
+library(hrbrthemes)
+library(devtools)
+devtools::install_github("viking/r-yaml")
+
+
+
+bancon <- read_excel("data/banco_27_10_v01.xlsx", 
+                     col_types = c("numeric","numeric", "text", 
+                                   "numeric", "text", "text", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "text", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric"), na = "NA")
+
+
+bancoNTE <- read_excel("data/bancoNTE.xlsx")
+
+bancoNTE_v01 <- bancoNTE %>% group_by(NTE) %>% select(Codigo) %>% distinct()
+
+bancoteste <- NULL
+bancoteste <- left_join(bancon,bancoNTE_v01,by = c("Codigo_INEP"="Codigo"))
+################################################################################
+
+#1 Leitura de dados de vistoria detalhadas
+
+escolas_detalhadas_csv <- read_csv("data/escolassalvador_v01.csv",
+                                   col_types = cols(DATA_VISITA_01 = col_date(format = "%m/%d/%Y")))
+
+#2 Conversao de unidades das coordenadas geograficas de Graus para decimal 
+
+
+escolas_detalhadas_csv %<>% mutate(LATITUDE=measurements::conv_unit(LATITUDE, from = "deg_min_sec", to = "dec_deg"),
+                                   LONGITUDE=measurements::conv_unit(LONGITUDE, from = "deg_min_sec", to = "dec_deg"))
+
+escolas_detalhadas_csv %<>% mutate(LATITUDE=-as.numeric(LATITUDE),
+                                   LONGITUDE=-as.numeric(LONGITUDE))
+#3 Visualizacao - espacialização dos dados
+
+escolas_detalhadas_csv %>%   leaflet() %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$OpenStreetMap.DE) %>% 
+  setView(-38.4368023,-12.9144042,10) %>%
+  addHeatmap(lng=~LONGITUDE,lat=~LATITUDE,intensity=~4,max=4.13,radius=10,blur=20) 
+
+
+#4 Definicao de funcoes de selecao de meses ant e post.
+# Selecao de dados a partir de uma data ou posterior
+library(lubridate)
+data_ant = function(Dataall){
+  
+  vetor_mes <- NULL
+  vetor_ano <- NULL
+  Data <- NULL
+  df <- NULL 
+  
+  Dataall<-as.Date(paste(year(Dataall),month(Dataall),"15",sep='-'))
+  
+  for(k in 1:length(Dataall)){
+  
+#    Data <- Dataall[k]
+    
+  
+    for (i in 1:12){
+      Data <- Dataall[k]
+      if(month(Data)-1>0){
+        vetor_mes[i] = month(Data)-1
+        vetor_ano[i] = year(Data)
+        Data <- Data-months(1)
+        Dataall[k]<-Data 
+         }else{
+                Data <- Dataall[k] 
+                vetor_mes[i] = 12
+                vetor_ano[i] = year(Data)-1
+                Data<-Data-years(1)
+                Data<-Data+months(11)
+                Dataall[k]<-Data
+                }
+  }
+      df <- rbind(df, data.frame(vetor_ano,vetor_mes))
+      
+  }
+  saida <- df
+    return(saida)
+}
+
+  library(lubridate)
+  library(mondate)
+data_post = function(Dataall){
+
+  vetor_mesp <- NULL
+  vetor_anop <- NULL
+  Data <- NULL
+  df <- NULL 
+  
+  Dataall<-as.Date(paste(year(as.Date(as.mondate(Dataall)+13)),
+                     month(as.Date(as.mondate(Dataall)+13)),
+                     "15",sep='-'))
+  
+  for(k in 1:length(Dataall)){
+    
+    #    Data <- Dataall[k]
+    
+    
+    for (i in 1:12){
+      Data <- Dataall[k]
+      if(month(Data)-1>0){
+        vetor_mesp[i] = month(Data)-1
+        vetor_anop[i] = year(Data)
+        Data <- Data-months(1)
+        Dataall[k]<-Data 
+      }else{
+        Data <- Dataall[k] 
+        vetor_mesp[i] = 12
+        vetor_anop[i] = year(Data)-1
+        Data<-Data-years(1)
+        Data<-Data+months(11)
+        Dataall[k]<-Data
+      }
+    }
+    df <- rbind(df, data.frame(vetor_anop,vetor_mesp))
+    
+  }
+  saida <- df
+  return(saida)
+}
+
+#5 Media de 12 meses antes e depois da vistoria 
+
+
+period_ant <- escolas_detalhadas_csv %>% 
+  select(CODIGO_INEP,DATA_VISITA_01) %>% 
+  group_by(CODIGO_INEP) %>% summarise(data_ant(DATA_VISITA_01))
+
+
+period_post <- escolas_detalhadas_csv %>% 
+  select(CODIGO_INEP,DATA_VISITA_01) %>% 
+  group_by(CODIGO_INEP) %>% summarise(data_post(DATA_VISITA_01))
+
+
+names(period_ant) <- c("Codigo_INEP","Ano","Mês")
+names(period_post) <- c("Codigo_INEP","Ano","Mês")
+
+dados_ant_vist  <-inner_join(bancoteste,period_ant) 
+dados_post_vist <-inner_join(bancoteste,period_post) 
+
+```
+
+Vistoriadas
+=======================================================================
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Diferenca de consumo apos vistoria
+
+```{r}
+
+media_dados_ant_vist <- dados_ant_vist %>% group_by(Codigo_INEP) %>% 
+  summarise(media_ant=mean(`Consumo_m³`))
+media_dados_post_vist <- dados_post_vist %>% group_by(Codigo_INEP) %>% 
+  summarise(media_post=mean(`Consumo_m³`))
+
+comp_ant_post <- inner_join(media_dados_ant_vist,media_dados_post_vist)
+
+library(echarts4r)
+#grafico <- 
+  comp_ant_post %>% 
+  mutate(Codigo_INEP = as.character(Codigo_INEP)) %>%
+  group_by(Codigo_INEP) %>%
+  summarise(diferenca = media_post-media_ant) %>%
+  arrange(by=diferenca) %>%
+  mutate(Codigo_INEP=factor(Codigo_INEP, levels=Codigo_INEP)) |> 
+  e_charts(Codigo_INEP) |> 
+  e_bar(diferenca,name = "Diferença de Consumo médio") |> 
+  e_flip_coords() |> 
+  e_toolbox_feature(feature = "dataZoom")
+    
+```
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Locais de consumo
+
+```{r}
+library(echarts4r)
+library(lubridate)
+
+escolas_detalhadas_csv %>% 
+  select(CODIGO_INEP,PORTE,AREA_TERRENO,AREA_CONSTRUIDA,ESTUDANTES) -> teste
+
+knitr::kable(teste[,c("CODIGO_INEP","PORTE","AREA_TERRENO","AREA_CONSTRUIDA","ESTUDANTES")])
+
+
+```
+
+
+
+Consumo
+=======================================================================
+
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+ selectInput("clusterNum", label = h3("Código INEP"), 
+    choices = c(as.factor(bancon$Codigo_INEP)), 
+    selected = 29261660)
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Historico de consumo
+    
+```{r}
+library(echarts4r)
+num <- reactive(as.integer(input$clusterNum))
+
+ renderEcharts4r({
+bancon %>%
+  select(Codigo_INEP,Ano,Mês,`Consumo_m³`) %>% 
+  group_by(Codigo_INEP) %>%
+  summarise(Dataall=as.Date(paste(Ano,Mês,"15",sep='-')),`Consumo_m³`) %>%
+    filter(Codigo_INEP %in% c(as.character(num()))) %>% arrange(Dataall) %>%
+    e_charts(Dataall) |>
+    e_line(`Consumo_m³`) |>
+      e_tooltip(trigger = "axis") |> 
+      e_format_y_axis(suffix = "m³") |>
+     e_title("Consumo mensal")
+    })
+```
+
+
+Inventario
+=======================================================================
+
+### Georreferenciamento
+
+```{r}
+
+#3 Visualizacao - espacialização dos dados
+
+#escolas_detalhadas_csv %>%   leaflet() %>% 
+#  addTiles() %>% 
+#  addProviderTiles(providers$OpenStreetMap.DE) %>% 
+#  setView(-38.4368023,-12.9144042,10) %>%
+#  addHeatmap(lng=~LONGITUDE,lat=~LATITUDE,intensity=~4,max=4.13,radius=10,blur=20) 
+
+library(htmltools)
+library(htmlwidgets)
+
+
+escolas_detalhadas_csv %>%   leaflet() %>%  addTiles() %>%
+    addCircleMarkers(~LONGITUDE, ~LATITUDE, popup = ~CODIGO_INEP, label = ~NOME,
+               labelOptions = labelOptions(noHide = F, textsize = "8px"))
+
+```
+
