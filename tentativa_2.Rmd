@@ -23,10 +23,12 @@ library(flexdashboard)
 library(readxl)
 library(readr)
 
-dados <- read.csv("data/aud_sexo_bio - sexo_bio.csv")
+#dados <- read.csv("data/aud_sexo_bio - sexo_bio.csv")
+dados <- read_xlsx("data/tentativa.xlsx")
 dados1 <- read_xlsx("data/raca.xlsx")
-dados2 <- read_delim("data/audiencia_idade.csv", 
-    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+#dados2 <- read_delim("data/audiencia_idade.csv", 
+#    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+dados2 <- read_xlsx("data/audiencia_idade.xlsx")
 
 ```
 
@@ -48,12 +50,23 @@ library(dplyr)
 library(plotly)
 
 # Plot
+#renderPlotly(
+#  ggplot(dados, aes(x = ano))+
+#    geom_col(aes(y=Homens), fill = 'cyan')+
+#    geom_col(aes(y=Mulheres), fill = 'pink')+
+#    ylab('Número de autuados')+
+#    theme(legend.position = "top")
+#)
+
+
 renderPlotly(
-  ggplot(dados, aes(x = ano))+
-    geom_col(aes(y=Homens), fill = 'cyan')+
-    geom_col(aes(y=Mulheres), fill = 'pink')+
-    ylab('Número de autuados')
+  ggplot(dados, aes(x = ano, y = `Número de autuados`, fill = Sexo))+
+    geom_col(position = 'dodge')+
+    ylab('Número de autuados')+
+    theme(legend.position = "top")+
+    scale_fill_manual(values=c("cyan", "hot pink"),labels = c("Homens", "Mulheres"))
 )
+
 ```
 
 ## Column {data-width=500}
@@ -67,14 +80,23 @@ library(dplyr)
 library(plotly)
 
 # Plot
+#renderPlotly(
+#  ggplot(dados2, aes(x = ano))+
+#    geom_col(aes(y=`18-29`), fill = 'blue')+
+#    geom_col(aes(y=`30-41`), fill = 'cyan')+
+#    geom_col(aes(y=`42-53`), fill = 'green')+
+#    geom_col(aes(y=maiores_60), fill = 'yellow')+
+#    ylab('Número de autuados')+
+#    theme(legend.position = "top")
+#)
+
 renderPlotly(
-  ggplot(dados2, aes(x = ano))+
-    geom_col(aes(y=`18-29`), fill = 'blue')+
-    geom_col(aes(y=`30-41`), fill = 'cyan')+
-    geom_col(aes(y=`42-53`), fill = 'green')+
-    geom_col(aes(y=maiores_60), fill = 'yellow')+
-    ylab('Número de autuados')
+  ggplot(dados2, aes(x = ano, y = `Número de autuados`, fill = Idade))+
+    geom_col(position = 'dodge')+
+    ylab('Número de autuados')+
+    theme(legend.position = "top")
 )
+
 ```
 
 # Visualização 2 {data-icon="fa-signal" data-navmenu="Análises"}
@@ -109,7 +131,9 @@ renderPlotly(
     
     aes(x=raca,y=quantidade))+
     
-  geom_col(aes(fill = raca))
+  geom_col(aes(fill = raca))+
+  ylab('Quantidade')+
+  xlab('Raça')
 )
 
 
