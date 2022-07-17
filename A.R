@@ -31,5 +31,5 @@ library(leaflet.extras)
 library(leaflet.providers)
 
 salvador %>%   leaflet() %>%  addTiles() %>%
-  addCircleMarkers(lng=salvador$NumCoordESub[1:10]/100, lat=salvador$NumCoordNSub[1:10]/100, popup = "NomSubEstacao",
+  addMarkers(lng=salvador$NumCoordESub/100, lat=salvador$NumCoordNSub/100, popup = "NomSubEstacao",
                    labelOptions = labelOptions(noHide = F, textsize = "8px"))
